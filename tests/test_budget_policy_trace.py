@@ -1,0 +1,80 @@
+from pathlib import Path
+
+from maikit_core.agent_spec import BudgetConfig, PolicyConfig
+from maikit_core.budget import Usage, check_budget
+from maikit_core.policy import evaluate_policy
+from maikit_core.trace import TraceRecord, append_trace, next_run_id, read_traces, redact_input
+
+
+def test_budget_check_reports_ok_and_exceeded_limits() -> None:
+    budget = BudgetConfig(
+        max_model_calls=1,
+        max_tool_calls=2,
+        max_subagents=0,
+        max_estimated_tokens=100,
+        on_exceed="ask_human",
+    )
+
+    ok = check_budget(
+        Usage(model_calls=1, tool_calls=2, subagents=0, estimated_tokens=100),
+        budget,
+    )
+    exceeded = check_budget(
+        Usage(model_calls=2, tool_calls=3, subagents=1, estimated_tokens=120),
+        budget,
+    )
+
+    assert ok.status == "ok"
+    assert exceeded.status == "exceeded"
+    assert exceeded.exceeded_limits == [
+        "max_model_calls",
+        "max_tool_calls",
+        "max_subagents",
+        "max_estimated_tokens",
+    ]
+    assert exceeded.on_exceed == "ask_human"
+
+
+def test_policy_flags_blocked_and_approval_required_actions() -> None:
+    policy = PolicyConfig(
+        allowed_actions=["classify_issue"],
+        blocked_actions=["rollback"],
+        approval_required=["page_engineer"],
+    )
+
+    decision = evaluate_policy(["classify_issue", "rollback", "page_engineer"], policy)
+
+    assert decision.allowed_actions == ["classify_issue"]
+    assert decision.blocked_actions == ["rollback"]
+    assert decision.approval_required_actions == ["page_engineer"]
+    assert decision.requires_human_approval is True
+
+
+def test_trace_records_are_jsonl_and_inputs_are_redacted(tmp_path: Path) -> None:
+    trace_path = tmp_path / ".maikit" / "traces.jsonl"
+    record = TraceRecord(
+        run_id=next_run_id(trace_path),
+        agent_name="latency_triage",
+        platform="cli",
+        prompt_version="triage_v1",
+        model="gpt-4.1-mini",
+        input_redacted=redact_input("pricing-api token sk-123456 password=secret", "redacted"),
+        schema_validation="passed",
+        model_calls=1,
+        tool_calls=0,
+        subagents=0,
+        estimated_tokens=1450,
+        budget_status="ok",
+        confidence=0.68,
+        requires_human_approval=True,
+        latency_ms=25,
+        timestamp="2026-07-02T22:00:00+08:00",
+    )
+
+    append_trace(record, trace_path)
+    traces = read_traces(trace_path)
+
+    assert traces == [record]
+    assert traces[0].run_id == "run_001"
+    assert "sk-123456" not in traces[0].input_redacted
+    assert "password=secret" not in traces[0].input_redacted

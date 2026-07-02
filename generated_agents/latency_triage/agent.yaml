@@ -1,0 +1,49 @@
+name: latency_triage
+description: Triage messy latency incident messages.
+
+model:
+  provider: openai
+  name: gpt-4.1-mini
+  fallback: anthropic/claude-3-5-haiku-latest
+
+prompt:
+  version: triage_v1
+  file: prompts/triage_v1.md
+
+output_schema:
+  name: TriageResult
+
+budget:
+  max_model_calls: 8
+  max_tool_calls: 10
+  max_subagents: 2
+  max_estimated_tokens: 80000
+  on_exceed: ask_human
+
+policy:
+  allowed_actions:
+    - classify_issue
+    - draft_jira_ticket
+    - ask_missing_info
+  blocked_actions:
+    - rollback
+    - deploy
+    - write_database
+    - send_order
+  approval_required:
+    - create_jira_ticket
+    - page_engineer
+
+platforms:
+  cli: true
+  slack: true
+  telegram: true
+  mcp: true
+  cron: true
+
+observability:
+  prompt_versioning: true
+  trace_logging: true
+  cost_tracking: true
+  latency_tracking: true
+  store_inputs: redacted

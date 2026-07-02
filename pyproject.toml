@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "maikit"
+version = "0.1.0"
+description = "Local-first scaffold generator for AI agent interfaces."
+requires-python = ">=3.11"
+dependencies = [
+  "jinja2>=3.1",
+  "pydantic>=2.0",
+  "pyyaml>=6.0",
+  "streamlit>=1.30",
+  "typer>=0.9",
+]
+
+[project.optional-dependencies]
+adapters = [
+  "apscheduler>=3.10",
+  "mcp>=1.0",
+  "python-telegram-bot>=21.0",
+  "slack-bolt>=1.20",
+]
+dev = [
+  "pytest>=8.0",
+  "ruff>=0.5",
+]
+llm = [
+  "litellm>=1.0",
+]
+
+[project.scripts]
+maikit = "maikit_cli.main:main"
+
+[tool.setuptools.packages.find]
+include = ["maikit_cli*", "maikit_core*", "dashboard*"]
+
+[tool.setuptools.package-data]
+maikit_cli = ["templates/*.j2"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
