@@ -39,6 +39,7 @@ class BudgetConfig(StrictModel):
     max_tool_calls: int = Field(ge=0)
     max_subagents: int = Field(ge=0)
     max_estimated_tokens: int = Field(ge=0)
+    max_estimated_cost_usd: float = Field(default=1.0, ge=0)
     on_exceed: Literal["ask_human", "stop", "warn"] = "ask_human"
 
 
@@ -111,7 +112,9 @@ def load_agent_spec(path: Path) -> AgentSpec:
         raise AgentSpecError(f"Could not read {path}: {exc}") from exc
 
     if not isinstance(data, dict):
-        raise AgentSpecError(f"{path.name} must contain a YAML mapping at the top level")
+        raise AgentSpecError(
+            f"{path.name} must contain a YAML mapping at the top level"
+        )
 
     try:
         return AgentSpec.model_validate(data)

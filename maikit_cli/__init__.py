@@ -1,2 +1,1 @@
 """MaiKit CLI package."""
-

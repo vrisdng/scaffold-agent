@@ -1,2 +1,1 @@
 """Core contracts for MaiKit."""
-

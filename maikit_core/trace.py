@@ -22,11 +22,23 @@ class TraceRecord(BaseModel):
     model_calls: int = Field(ge=0)
     tool_calls: int = Field(ge=0)
     subagents: int = Field(ge=0)
+    estimated_input_tokens: int = Field(default=0, ge=0)
+    estimated_reasoning_tokens: int = Field(default=0, ge=0)
+    estimated_output_tokens: int = Field(default=0, ge=0)
     estimated_tokens: int = Field(ge=0)
+    input_cost_usd: float = Field(default=0, ge=0)
+    reasoning_cost_usd: float = Field(default=0, ge=0)
+    output_cost_usd: float = Field(default=0, ge=0)
+    total_cost_usd: float = Field(default=0, ge=0)
+    budget_limit_usd: float = Field(default=0, ge=0)
+    budget_used_pct: float = Field(default=0, ge=0)
     budget_status: str
     confidence: float = Field(ge=0, le=1)
     requires_human_approval: bool
     latency_ms: int = Field(ge=0)
+    latency_s: float = Field(default=0, ge=0)
+    token_source: str = "estimated"
+    cost_source: str = "estimated"
     timestamp: str
 
 

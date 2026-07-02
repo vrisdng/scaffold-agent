@@ -42,7 +42,11 @@ def test_scaffold_rejects_invalid_targets(tmp_path: Path) -> None:
         scaffold_agent("latency-triage", ["cli", "email"], base_dir=tmp_path)
 
 
-def test_run_agent_returns_valid_triage_and_writes_trace(tmp_path: Path) -> None:
+def test_run_agent_returns_valid_triage_and_writes_trace(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv("MAIKIT_USE_LLM", raising=False)
     agent_dir = scaffold_agent("latency-triage", ALL_TARGETS, base_dir=tmp_path)
     trace_path = tmp_path / ".maikit" / "traces.jsonl"
 
@@ -62,9 +66,21 @@ def test_run_agent_returns_valid_triage_and_writes_trace(tmp_path: Path) -> None
     assert traces[0].agent_name == "latency_triage"
     assert traces[0].schema_validation == "passed"
     assert traces[0].budget_status == "ok"
+    assert traces[0].estimated_tokens != 1450
+    assert traces[0].estimated_input_tokens > 0
+    assert traces[0].estimated_output_tokens > 0
+    assert traces[0].estimated_reasoning_tokens == 0
+    assert traces[0].total_cost_usd > 0
+    assert traces[0].budget_limit_usd == 0.05
+    assert traces[0].budget_used_pct > 0
+    assert traces[0].latency_ms >= 1
 
 
-def test_eval_runner_passes_generated_cases(tmp_path: Path) -> None:
+def test_eval_runner_passes_generated_cases(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv("MAIKIT_USE_LLM", raising=False)
     agent_dir = scaffold_agent("latency-triage", ALL_TARGETS, base_dir=tmp_path)
 
     summary = run_evals(agent_dir, trace_store=tmp_path / ".maikit" / "traces.jsonl")
@@ -74,13 +90,25 @@ def test_eval_runner_passes_generated_cases(tmp_path: Path) -> None:
     assert summary.failed == 0
 
 
-def test_cli_new_run_eval_smoke(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_cli_new_run_eval_smoke(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.delenv("MAIKIT_USE_LLM", raising=False)
     monkeypatch.chdir(tmp_path)
     runner = CliRunner()
 
     new_result = runner.invoke(
         app,
-        ["new", "latency-triage", "--targets", "cli", "slack", "telegram", "mcp", "cron"],
+        [
+            "new",
+            "latency-triage",
+            "--targets",
+            "cli",
+            "slack",
+            "telegram",
+            "mcp",
+            "cron",
+        ],
     )
     assert new_result.exit_code == 0, new_result.output
     assert "generated_agents/latency_triage" in new_result.output

@@ -65,9 +65,13 @@ def scaffold_agent(
 
     _render(env, "agent.yaml.j2", agent_dir / "agent.yaml", context)
     _render(env, "generated_agents_md.j2", agent_dir / "AGENTS.md", context)
-    _render(env, "prompt_triage_v1.md.j2", agent_dir / "prompts" / "triage_v1.md", context)
+    _render(
+        env, "prompt_triage_v1.md.j2", agent_dir / "prompts" / "triage_v1.md", context
+    )
     _render(env, "eval_cases.json.j2", agent_dir / "evals" / "eval_cases.json", context)
-    _render(env, "tool_policy.yaml.j2", agent_dir / "policies" / "tool_policy.yaml", context)
+    _render(
+        env, "tool_policy.yaml.j2", agent_dir / "policies" / "tool_policy.yaml", context
+    )
     _render(env, "env.example.j2", agent_dir / ".env.example", context)
     _render(
         env,

@@ -10,10 +10,10 @@ PROJECT_ROOT = Path(__file__).resolve().parents[3]
 if (PROJECT_ROOT / "maikit_cli").exists() and str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from telegram import Update
-from telegram.ext import ApplicationBuilder, ContextTypes, MessageHandler, filters
+from telegram import Update  # noqa: E402
+from telegram.ext import ApplicationBuilder, ContextTypes, MessageHandler, filters  # noqa: E402
 
-from maikit_cli.runner import run_agent
+from maikit_cli.runner import run_agent  # noqa: E402
 
 
 AGENT_DIR = Path(__file__).resolve().parents[1]

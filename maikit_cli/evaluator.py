@@ -51,7 +51,9 @@ def run_evals(
             write_trace=write_traces,
         )
         failures = _compare_expected(result.model_dump(), case.expected)
-        results.append(EvalResult(name=case.name, passed=not failures, failures=failures))
+        results.append(
+            EvalResult(name=case.name, passed=not failures, failures=failures)
+        )
 
     passed = sum(1 for result in results if result.passed)
     return EvalSummary(
@@ -93,5 +95,7 @@ def _compare_expected(actual: dict[str, Any], expected: dict[str, Any]) -> list[
             if actual.get(actual_key, 0) > expected_value:
                 failures.append(f"{actual_key} is above maximum {expected_value}")
         elif actual.get(key) != expected_value:
-            failures.append(f"{key} expected {expected_value!r}, got {actual.get(key)!r}")
+            failures.append(
+                f"{key} expected {expected_value!r}, got {actual.get(key)!r}"
+            )
     return failures

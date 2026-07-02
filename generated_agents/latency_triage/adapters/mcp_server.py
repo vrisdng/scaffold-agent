@@ -9,9 +9,9 @@ PROJECT_ROOT = Path(__file__).resolve().parents[3]
 if (PROJECT_ROOT / "maikit_cli").exists() and str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from mcp.server.fastmcp import FastMCP
+from mcp.server.fastmcp import FastMCP  # noqa: E402
 
-from maikit_cli.runner import run_agent
+from maikit_cli.runner import run_agent  # noqa: E402
 
 
 AGENT_DIR = Path(__file__).resolve().parents[1]

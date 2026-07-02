@@ -259,13 +259,27 @@ To try live LLM mode:
 
 ```bash
 python -m pip install -e ".[llm]"
-export MAIKIT_USE_LLM=1
-export OPENAI_API_KEY="your-key"
+cp generated_agents/latency_triage/.env.example generated_agents/latency_triage/.env
+```
+
+Then edit `generated_agents/latency_triage/.env`:
+
+```dotenv
+MAIKIT_USE_LLM=1
+OPENAI_API_KEY=your-key
+```
+
+Run the agent:
+
+```bash
 maikit run latency-triage "pricing-api latency spiked after latest deploy"
 ```
 
 If LiteLLM is unavailable or a live call fails, the runner falls back to the
 deterministic result unless `MAIKIT_STRICT_LLM=1` is set.
+
+You can also put `MAIKIT_USE_LLM=1` and provider API keys in the repository root
+`.env`. Values already exported in your shell take precedence over `.env` values.
 
 ## Trace Store
 
@@ -276,14 +290,45 @@ Runs write trace records to:
 ```
 
 Each trace includes run id, agent name, platform, prompt version, model, redacted
-input, schema status, model call count, estimated tokens, budget status,
-approval requirement, latency, confidence, and timestamp.
+input, schema status, model call count, input/reasoning/output token counts,
+input/reasoning/output/total estimated cost in USD, numeric budget limit and
+used percentage, approval requirement, latency in milliseconds and seconds,
+confidence, and timestamp.
 
 Inputs are redacted by default according to `agent.yaml`:
 
 ```yaml
 observability:
   store_inputs: redacted
+```
+
+Budget limits live in `agent.yaml`:
+
+```yaml
+budget:
+  max_estimated_tokens: 80000
+  max_estimated_cost_usd: 0.05
+```
+
+The dashboard shows:
+
+```text
+Tokens: total (input / reasoning / output)
+Cost ($): total (input / reasoning / output)
+Budget ($): total spend / limit (used %, status)
+Latency (ms): measured wall-clock latency in milliseconds
+```
+
+For deterministic fallback runs, reasoning tokens are `0`. For live provider
+runs, MaiKit uses provider token usage when LiteLLM exposes it, including
+reasoning tokens when present. Reasoning tokens are costed at the output-token
+rate unless overridden.
+
+You can override the built-in per-million token price estimates through `.env`:
+
+```dotenv
+MAIKIT_INPUT_COST_PER_1M=0.40
+MAIKIT_OUTPUT_COST_PER_1M=1.60
 ```
 
 ## Development Commands
