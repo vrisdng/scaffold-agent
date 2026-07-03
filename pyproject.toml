@@ -3,9 +3,10 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "maikit"
+name = "MaiAgentKit"
 version = "0.1.0"
 description = "Local-first scaffold generator for AI agent interfaces."
+readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
   "jinja2>=3.1",
@@ -29,6 +30,10 @@ dev = [
 llm = [
   "litellm>=1.0",
 ]
+
+[project.urls]
+Homepage = "https://github.com/vrisdng/scaffold-agent"
+Repository = "https://github.com/vrisdng/scaffold-agent"
 
 [project.scripts]
 maikit = "maikit_cli.main:main"

@@ -25,7 +25,38 @@ are optional.
 
 ## Setup
 
-Use a virtual environment from the repository root:
+MaiKit is published to PyPI as [`MaiAgentKit`](https://pypi.org/project/MaiAgentKit/).
+It exposes the `maikit` command.
+
+### Run with no install (recommended)
+
+With [uv](https://docs.astral.sh/uv/), run the latest release in a throwaway
+environment — no clone, no venv, nothing left behind:
+
+```bash
+uvx --from MaiAgentKit maikit new latency-triage --targets cli slack telegram mcp cron
+```
+
+### Install as a tool
+
+To keep `maikit` on your PATH:
+
+```bash
+uv tool install MaiAgentKit   # or: pipx install MaiAgentKit
+maikit run latency-triage "pricing-api latency spiked after latest deploy"
+```
+
+### Develop from a clone
+
+`uv sync` creates `.venv` and installs everything (including dev deps) in one step:
+
+```bash
+uv sync
+uv run maikit new latency-triage --targets cli slack telegram mcp cron
+```
+
+<details>
+<summary>Fallback: plain venv + pip</summary>
 
 ```bash
 python3 -m venv .venv
@@ -34,18 +65,8 @@ python -m pip install -U pip
 python -m pip install -e ".[dev]"
 ```
 
-After activation, `python3` and `maikit` should both resolve inside `.venv`:
-
-```bash
-which python3
-which maikit
-```
-
-If you prefer using the requirements file:
-
-```bash
-python -m pip install -r requirements-dev.txt
-```
+Or with the requirements file: `python -m pip install -r requirements-dev.txt`
+</details>
 
 ## Optional Extras
 
@@ -53,11 +74,11 @@ The core MVP does not require live external services. Install extras only when
 you want those specific paths:
 
 ```bash
-python -m pip install -e ".[llm]"
-python -m pip install -e ".[adapters]"
+uv sync --extra llm --extra adapters        # from a clone
+uv tool install "MaiAgentKit[llm,adapters]" # installed as a tool
 ```
 
-`.[llm]` installs LiteLLM for live model calls. `.[adapters]` installs optional
+`llm` installs LiteLLM for live model calls. `adapters` installs optional
 libraries used by generated Slack, Telegram, MCP, and APScheduler scaffolds.
 
 ## Command Reference

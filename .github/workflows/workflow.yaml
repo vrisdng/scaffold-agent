@@ -1,0 +1,28 @@
+name: Publish to PyPI
+
+# Publishes MaiAgentKit to PyPI via Trusted Publishing (OIDC — no API token).
+# Triggered when a GitHub Release is published. To cut a release:
+#   git tag v0.1.0 && git push origin v0.1.0
+#   then publish a Release for that tag on GitHub.
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write  # required for Trusted Publishing
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Build sdist and wheel
+        run: uv build
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
