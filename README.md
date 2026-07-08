@@ -8,6 +8,8 @@ for the dashboard.
 
 The demo agent is a latency incident triage agent.
 
+<!-- Test change: verifying PR workflow. -->
+
 ## What Works In This MVP
 
 The main workflow is:
