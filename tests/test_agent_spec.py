@@ -40,6 +40,7 @@ platforms:
   cli: true
   slack: true
   telegram: true
+  discord: true
   mcp: true
   cron: true
 observability:
@@ -73,6 +74,14 @@ def test_load_agent_spec_accepts_required_contract(tmp_path: Path) -> None:
     ]
     assert spec.platforms.cli is True
     assert spec.observability.store_inputs == "redacted"
+
+
+def test_load_agent_spec_defaults_discord_when_omitted(tmp_path: Path) -> None:
+    without_discord = VALID_AGENT_YAML.replace("  discord: true\n", "")
+
+    spec = load_agent_spec(_write_spec(tmp_path, without_discord))
+
+    assert spec.platforms.discord is False
 
 
 def test_load_agent_spec_reports_actionable_validation_errors(tmp_path: Path) -> None:

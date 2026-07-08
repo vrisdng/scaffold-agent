@@ -1,0 +1,40 @@
+"""discord.py scaffold for latency_triage."""
+
+from __future__ import annotations
+
+import os
+import sys
+from pathlib import Path
+
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
+if (PROJECT_ROOT / "maikit_cli").exists() and str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+import discord  # noqa: E402
+
+from maikit_cli.runner import run_agent  # noqa: E402
+
+
+AGENT_DIR = Path(__file__).resolve().parents[1]
+
+
+class AgentClient(discord.Client):
+    async def on_ready(self) -> None:
+        print(f"Logged on as {self.user}")
+
+    async def on_message(self, message: discord.Message) -> None:
+        if message.author == self.user or not message.content:
+            return
+        result = run_agent(AGENT_DIR, message.content)
+        await message.channel.send(result.model_dump_json(indent=2))
+
+
+def main() -> None:
+    intents = discord.Intents.default()
+    intents.message_content = True
+    client = AgentClient(intents=intents)
+    client.run(os.environ["DISCORD_BOT_TOKEN"])
+
+
+if __name__ == "__main__":
+    main()

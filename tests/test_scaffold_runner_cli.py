@@ -12,7 +12,7 @@ from maikit_core.agent_spec import load_agent_spec
 from maikit_core.trace import read_traces
 
 
-ALL_TARGETS = ["cli", "slack", "telegram", "mcp", "cron"]
+ALL_TARGETS = ["cli", "slack", "telegram", "discord", "mcp", "cron"]
 
 
 def test_scaffold_generation_creates_selected_agent_files(tmp_path: Path) -> None:
@@ -23,6 +23,7 @@ def test_scaffold_generation_creates_selected_agent_files(tmp_path: Path) -> Non
     assert spec.name == "latency_triage"
     assert spec.platforms.cli is True
     assert spec.platforms.slack is True
+    assert spec.platforms.discord is True
     assert (agent_dir / "prompts" / "triage_v1.md").exists()
     assert (agent_dir / "evals" / "eval_cases.json").exists()
     assert (agent_dir / "policies" / "tool_policy.yaml").exists()
@@ -31,6 +32,7 @@ def test_scaffold_generation_creates_selected_agent_files(tmp_path: Path) -> Non
         "cli.py",
         "slack_app.py",
         "telegram_bot.py",
+        "discord_bot.py",
         "mcp_server.py",
         "scheduler.py",
     ]:
@@ -106,6 +108,7 @@ def test_cli_new_run_eval_smoke(
             "cli",
             "slack",
             "telegram",
+            "discord",
             "mcp",
             "cron",
         ],

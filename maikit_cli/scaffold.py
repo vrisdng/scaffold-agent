@@ -8,12 +8,13 @@ from pathlib import Path
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
 
 
-VALID_TARGETS = {"cli", "slack", "telegram", "mcp", "cron"}
+VALID_TARGETS = {"cli", "slack", "telegram", "discord", "mcp", "cron"}
 
 ADAPTER_TEMPLATES = {
     "cli": ("adapter_cli.py.j2", "cli.py"),
     "slack": ("adapter_slack_app.py.j2", "slack_app.py"),
     "telegram": ("adapter_telegram_bot.py.j2", "telegram_bot.py"),
+    "discord": ("adapter_discord_bot.py.j2", "discord_bot.py"),
     "mcp": ("adapter_mcp_server.py.j2", "mcp_server.py"),
     "cron": ("adapter_scheduler.py.j2", "scheduler.py"),
 }
