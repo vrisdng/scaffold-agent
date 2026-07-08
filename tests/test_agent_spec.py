@@ -40,6 +40,7 @@ platforms:
   cli: true
   slack: true
   telegram: true
+  discord: true
   mcp: true
   cron: true
 observability:

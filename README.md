@@ -2,7 +2,7 @@
 
 MaiKit is a local-first scaffold generator for AI agents. The MVP takes one
 portable agent specification and generates runnable local scaffolds for a CLI,
-Slack, Telegram, MCP, and cron-style scheduled runs. Each local run validates
+Slack, Telegram, Discord, MCP, and cron-style scheduled runs. Each local run validates
 structured output, applies policy and budget checks, and records trace metadata
 for the dashboard.
 
@@ -15,14 +15,14 @@ The demo agent is a latency incident triage agent.
 The main workflow is:
 
 ```bash
-maikit new latency-triage --targets cli slack telegram mcp cron
+maikit new latency-triage --targets cli slack telegram discord mcp cron
 maikit run latency-triage "pricing-api latency spiked after latest deploy"
 maikit eval latency-triage
 maikit dashboard
 ```
 
 By default, `maikit run` uses a deterministic local fallback. That means the MVP
-works without OpenAI, Slack, Telegram, MCP, or cron credentials. Live LLM calls
+works without OpenAI, Slack, Telegram, Discord, MCP, or cron credentials. Live LLM calls
 are optional.
 
 ## Setup
@@ -60,7 +60,7 @@ python -m pip install -e ".[adapters]"
 ```
 
 `.[llm]` installs LiteLLM for live model calls. `.[adapters]` installs optional
-libraries used by generated Slack, Telegram, MCP, and APScheduler scaffolds.
+libraries used by generated Slack, Telegram, Discord, MCP, and APScheduler scaffolds.
 
 ## Command Reference
 
@@ -69,7 +69,7 @@ libraries used by generated Slack, Telegram, MCP, and APScheduler scaffolds.
 Generate an agent scaffold.
 
 ```bash
-maikit new latency-triage --targets cli slack telegram mcp cron
+maikit new latency-triage --targets cli slack telegram discord mcp cron
 ```
 
 What it does:
@@ -93,6 +93,7 @@ generated_agents/latency_triage/
   adapters/cli.py
   adapters/slack_app.py
   adapters/telegram_bot.py
+  adapters/discord_bot.py
   adapters/mcp_server.py
   adapters/scheduler.py
   observability/trace_logger.py
@@ -101,7 +102,7 @@ generated_agents/latency_triage/
 Valid targets are:
 
 ```text
-cli slack telegram mcp cron
+cli slack telegram discord mcp cron
 ```
 
 You can also generate one or a few targets:
@@ -247,6 +248,49 @@ python generated_agents/latency_triage/adapters/cli.py \
 This is useful for verifying that generated code can run directly from the
 source checkout.
 
+## Chat Adapters
+
+Chat adapters (`slack`, `telegram`, `discord`) wrap the same `run_agent` call
+behind a bot event loop. They need the optional adapter libraries and a bot
+token:
+
+```bash
+python -m pip install -e ".[adapters]"
+```
+
+Each adapter reads its token from the environment (or the generated
+`.env.example` copied to `.env`).
+
+### Discord
+
+The Discord adapter (`adapters/discord_bot.py`) is built on
+[discord.py](https://discordpy.readthedocs.io). It listens for messages, runs
+the agent on the message content, and replies with the validated JSON result.
+
+Setup:
+
+1. Create an application and bot at the
+   [Discord Developer Portal](https://discord.com/developers/applications).
+2. Under **Bot**, copy the token and enable the **Message Content Intent**
+   (required so the bot can read message text).
+3. Invite the bot to a server with the `bot` scope and the "Send Messages" and
+   "Read Message History" permissions.
+4. Export the token:
+
+   ```bash
+   export DISCORD_BOT_TOKEN=your-bot-token
+   ```
+
+Run the bot:
+
+```bash
+python generated_agents/latency_triage/adapters/discord_bot.py
+```
+
+Then message the bot in any channel it can see (or a DM). For example, sending
+`pricing-api latency spiked after latest deploy` returns the structured triage
+result as JSON. The bot ignores its own messages and empty content.
+
 ## Deterministic Mode Versus Live LLM Mode
 
 Default mode is deterministic:
@@ -350,7 +394,7 @@ ruff check .
 Run the full local smoke path:
 
 ```bash
-maikit new latency-triage --targets cli slack telegram mcp cron
+maikit new latency-triage --targets cli slack telegram discord mcp cron
 maikit run latency-triage "pricing-api latency spiked after latest deploy"
 maikit eval latency-triage
 MAIKIT_DASHBOARD_DRY_RUN=1 maikit dashboard

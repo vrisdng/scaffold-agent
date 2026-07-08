@@ -65,6 +65,7 @@ class PlatformsConfig(StrictModel):
     cli: bool
     slack: bool
     telegram: bool
+    discord: bool
     mcp: bool
     cron: bool
 

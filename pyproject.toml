@@ -18,6 +18,7 @@ dependencies = [
 [project.optional-dependencies]
 adapters = [
   "apscheduler>=3.10",
+  "discord.py>=2.3",
   "mcp>=1.0",
   "python-telegram-bot>=21.0",
   "slack-bolt>=1.20",
